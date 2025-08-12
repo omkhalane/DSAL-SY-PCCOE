@@ -57,7 +57,7 @@ void quickSort(vector<long double> &arr, int low, int high)
 
 int main()
 {
-    vector<long double> transactions; // long double to handle large transactions
+    vector<long double> t; // long double to handle large transactions
     int n;
 
     cout << "Enter number of transactions: ";
@@ -68,15 +68,15 @@ int main()
     {
         long double amount;
         cin >> amount;
-        transactions.push_back(amount);
+        t.push_back(amount);
     }
 
-    quickSort(transactions, 0, n - 1);
+    quickSort(t, 0, n - 1);
 
     cout << "\nSorted transactions :\n";
-    for (int i = 0; i < transactions.size(); i++)
+    for (int i = 0; i < t.size(); i++)
     {
-        cout << transactions[i] << " ";
+        cout << t[i] << " ";
     }
     cout << endl;
 

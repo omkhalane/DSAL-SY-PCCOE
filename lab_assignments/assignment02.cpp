@@ -56,7 +56,7 @@ void quickSort(vector<int> &arr, int low, int high)
 
 int main()
 {
-    vector<int> quantities;
+    vector<int> q;
     int n;
 
     cout << "Enter number of inventory items: ";
@@ -67,15 +67,15 @@ int main()
     {
         int temp;
         cin >> temp;
-        quantities.push_back(temp);
+        q.push_back(temp);
     }
 
-    quickSort(quantities, 0, n - 1);
+    quickSort(q, 0, n - 1);
 
     cout << "\nSorted stock quantities (Ascending):\n";
-    for (int i = 0; i < quantities.size(); i++)
+    for (int i = 0; i < q.size(); i++)
     {
-        cout << quantities[i] << " ";
+        cout << q[i] << " ";
     }
     cout << endl;
 
