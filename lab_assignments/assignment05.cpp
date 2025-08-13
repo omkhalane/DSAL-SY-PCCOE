@@ -1,3 +1,24 @@
+/**
+ * ===============================================
+ * @file        assignment05.cpp
+ * @path        /code/DSA/problems/lab_assignments
+ * @author      Om Khalane
+ * @created     2025-08-13
+ * @updated     2025-08-13
+ *
+ * @description N/A
+ *
+ * @tech        HTML
+ *
+ * @notes       N/A
+ * ===============================================
+ */
+
+//  Write a program to perform Polynomial Addition using Linked Lists
+
+// ● Each term is a node (with coefficient and power).
+// ● Add two polynomials represented by linked lists.
+
 #include <iostream>
 using namespace std;
 
