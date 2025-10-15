@@ -8,7 +8,7 @@
  *
  * @description N/A
  *
- * @tech        HTML
+ * @tech        cpp
  *
  * @notes       N/A
  * ===============================================
