@@ -1,20 +1,42 @@
-name: C++ Auto Build
+name: C++ Auto Build and Run
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  build:
+  build-and-run:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # Step 1: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install compiler
+      # Step 2: Install g++ compiler
+      - name: Install g++
         run: sudo apt update && sudo apt install -y g++
 
-      - name: Compile all C++ files
-        run: g++ -std=c++17 -Wall -Wextra -o main *.cpp
+      # Step 3: Find all .cpp files and compile/run them
+      - name: Compile and run all C++ programs
+        run: |
+          # Loop through every .cpp file in the repo
+          for file in $(find . -name "*.cpp"); do
+            # Get the file name without extension for executable
+            exe="${file%.cpp}"
+            echo "Compiling $file..."
+            g++ -std=c++17 -Wall -Wextra "$file" -o "$exe"
 
-      - name: Run program with sample input
-        run: echo "5 10" | ./main || true
+            # Check if compilation succeeded
+            if [ $? -eq 0 ]; then
+              echo "Running $exe..."
+              
+              # Sample input (modify as needed)
+              echo "5 10" | ./"$exe" || true
+              echo "-----------------------------------"
+            else
+              echo "Compilation failed for $file"
+            fi
+          done
