@@ -29,147 +29,147 @@
 // Output:
 // For each visit, back, or forward operation, output the URL of the page the user is currently on after the operation.
 
-#include <bits/stdc++.h>
-using namespace std;
+        #include <bits/stdc++.h>
+        using namespace std;
 
-class BrowserHistory
-{
-private:
-    int capacity;
-    string current;
-    deque<string> backStack;
-    stack<string> forwardStack;
-
-public:
-    BrowserHistory(int cap, string homepage)
-    {
-        capacity = cap;
-        current = homepage;
-    }
-
-    void visit(const string &url)
-    {
-        backStack.push_back(current);
-
-        if ((int)backStack.size() > capacity)
+        class BrowserHistory
         {
-            backStack.pop_front();
-        }
+        private:
+            int capacity;
+            string current;
+            deque<string> backStack;
+            stack<string> forwardStack;
 
-        while (!forwardStack.empty())
+        public:
+            BrowserHistory(int cap, string homepage)
+            {
+                capacity = cap;
+                current = homepage;
+            }
+
+            void visit(const string &url)
+            {
+                backStack.push_back(current);
+
+                if ((int)backStack.size() > capacity)
+                {
+                    backStack.pop_front();
+                }
+
+                while (!forwardStack.empty())
+                {
+                    forwardStack.pop();
+                }
+
+                current = url;
+                cout << "Visited: " << current << endl;
+            }
+
+            void back()
+            {
+                if (backStack.empty())
+                {
+                    cout << "No previous page && Current Page : " << current << endl;
+                    return;
+                }
+
+                forwardStack.push(current);
+                current = backStack.back();
+                backStack.pop_back();
+
+                cout << "redirecting  back to: " << current << endl;
+            }
+
+            void forward()
+            {
+                if (forwardStack.empty())
+                {
+                    cout << "No forward page && Current page : " << current << endl;
+                    return;
+                }
+
+                backStack.push_back(current);
+                current = forwardStack.top();
+                forwardStack.pop();
+
+                if ((int)backStack.size() > capacity)
+                {
+                    backStack.pop_front();
+                }
+
+                cout << " redirecting forward to: " << current << endl;
+            }
+
+            // Display
+            void showHistory()
+            {
+                cout << "\n----- Browser History -----\n";
+                cout << "BackStack: ";
+                for (auto &p : backStack)
+                    cout << p << " ";
+                cout << "\nCurrent: " << current;
+                cout << "\nForwardStack: ";
+
+                stack<string> temp = forwardStack;
+                while (!temp.empty())
+                {
+                    cout << temp.top() << " ";
+                    temp.pop();
+                }
+                cout << "\n----------------------------\n";
+            }
+        };
+
+        // Driver code
+        int main()
         {
-            forwardStack.pop();
+            int capacity;
+            cout << "Enter browser history capacity: ";
+            cin >> capacity;
+
+            string homepage;
+            cout << "Enter homepage URL: ";
+            cin >> homepage;
+
+            BrowserHistory browser(capacity, homepage);
+
+            int choice;
+            string url;
+
+            do
+            {
+                cout << "\n1. Visit New Page\n2. Back\n3. Forward\n4. Show History\n5. Exit\nEnter choice: ";
+                cin >> choice;
+
+                switch (choice)
+                {
+                case 1:
+                    cout << "Enter URL: ";
+                    cin >> url;
+                    browser.visit(url);
+                    break;
+
+                case 2:
+                    browser.back();
+                    break;
+
+                case 3:
+                    browser.forward();
+                    break;
+
+                case 4:
+                    browser.showHistory();
+                    break;
+
+                case 5:
+                    cout << "Exiting...\n";
+                    break;
+
+                default:
+                    cout << "Invalid choice! Try again.\n";
+                }
+
+            } while (choice != 5);
+
+            return 0;
         }
-
-        current = url;
-        cout << "Visited: " << current << endl;
-    }
-
-    void back()
-    {
-        if (backStack.empty())
-        {
-            cout << "No previous page && Current Page : " << current << endl;
-            return;
-        }
-
-        forwardStack.push(current);
-        current = backStack.back();
-        backStack.pop_back();
-
-        cout << "redirecting  back to: " << current << endl;
-    }
-
-    void forward()
-    {
-        if (forwardStack.empty())
-        {
-            cout << "No forward page && Current page : " << current << endl;
-            return;
-        }
-
-        backStack.push_back(current);
-        current = forwardStack.top();
-        forwardStack.pop();
-
-        if ((int)backStack.size() > capacity)
-        {
-            backStack.pop_front();
-        }
-
-        cout << " redirecting forward to: " << current << endl;
-    }
-
-    // Display
-    void showHistory()
-    {
-        cout << "\n----- Browser History -----\n";
-        cout << "BackStack: ";
-        for (auto &p : backStack)
-            cout << p << " ";
-        cout << "\nCurrent: " << current;
-        cout << "\nForwardStack: ";
-
-        stack<string> temp = forwardStack;
-        while (!temp.empty())
-        {
-            cout << temp.top() << " ";
-            temp.pop();
-        }
-        cout << "\n----------------------------\n";
-    }
-};
-
-// Driver code
-int main()
-{
-    int capacity;
-    cout << "Enter browser history capacity: ";
-    cin >> capacity;
-
-    string homepage;
-    cout << "Enter homepage URL: ";
-    cin >> homepage;
-
-    BrowserHistory browser(capacity, homepage);
-
-    int choice;
-    string url;
-
-    do
-    {
-        cout << "\n1. Visit New Page\n2. Back\n3. Forward\n4. Show History\n5. Exit\nEnter choice: ";
-        cin >> choice;
-
-        switch (choice)
-        {
-        case 1:
-            cout << "Enter URL: ";
-            cin >> url;
-            browser.visit(url);
-            break;
-
-        case 2:
-            browser.back();
-            break;
-
-        case 3:
-            browser.forward();
-            break;
-
-        case 4:
-            browser.showHistory();
-            break;
-
-        case 5:
-            cout << "Exiting...\n";
-            break;
-
-        default:
-            cout << "Invalid choice! Try again.\n";
-        }
-
-    } while (choice != 5);
-
-    return 0;
-}
