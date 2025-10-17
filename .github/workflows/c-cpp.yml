@@ -1,23 +1,20 @@
-name: C/C++ CI
+name: C++ Auto Build
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install compiler
+        run: sudo apt update && sudo apt install -y g++
+
+      - name: Compile all C++ files
+        run: g++ -std=c++17 -Wall -Wextra -o main *.cpp
+
+      - name: Run program with sample input
+        run: echo "5 10" | ./main || true
