@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repo
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -19,24 +19,29 @@ jobs:
       - name: Install g++
         run: sudo apt update && sudo apt install -y g++
 
-      # Step 3: Find all .cpp files and compile/run them
-      - name: Compile and run all C++ programs
+      # Step 3: Compile and run all C++ programs with main()
+      - name: Compile and run C++ files
         run: |
           # Loop through every .cpp file in the repo
           for file in $(find . -name "*.cpp"); do
-            # Get the file name without extension for executable
-            exe="${file%.cpp}"
-            echo "Compiling $file..."
-            g++ -std=c++17 -Wall -Wextra "$file" -o "$exe"
-
-            # Check if compilation succeeded
-            if [ $? -eq 0 ]; then
-              echo "Running $exe..."
-              
-              # Sample input (modify as needed)
-              echo "5 10" | ./"$exe" || true
+            # Check if file contains main()
+            if grep -q "int main" "$file"; then
+              exe="${file%.cpp}"
               echo "-----------------------------------"
+              echo "Compiling $file..."
+              
+              # Compile the file
+              g++ -std=c++17 -Wall -Wextra "$file" -o "$exe"
+              
+              if [ $? -eq 0 ]; then
+                echo "Running $exe..."
+                
+                # Sample input (modify as needed)
+                echo "5 10" | ./"$exe" || true
+              else
+                echo "Compilation failed for $file"
+              fi
             else
-              echo "Compilation failed for $file"
+              echo "Skipping $file (no main function)"
             fi
           done
