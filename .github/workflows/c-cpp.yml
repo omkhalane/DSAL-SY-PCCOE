@@ -1,4 +1,4 @@
-name: C++ Auto Build and Run
+name: C++ Auto Build and Run (Inline Inputs)
 
 on:
   push:
@@ -11,33 +11,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Step 1: Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Install g++ compiler
+      # Step 2: Install g++
       - name: Install g++
         run: sudo apt update && sudo apt install -y g++
 
-      # Step 3: Compile and run all C++ programs with main()
-      - name: Compile and run C++ files
+      # Step 3: Compile and run programs with inline input
+      - name: Compile and run C++ programs
         run: |
-          # Loop through every .cpp file in the repo
+          mkdir -p outputs
+
           for file in $(find . -name "*.cpp"); do
-            # Check if file contains main()
             if grep -q "int main" "$file"; then
               exe="${file%.cpp}"
               echo "-----------------------------------"
               echo "Compiling $file..."
-              
-              # Compile the file
               g++ -std=c++17 -Wall -Wextra "$file" -o "$exe"
               
               if [ $? -eq 0 ]; then
-                echo "Running $exe..."
+                echo "Compilation succeeded for $file"
                 
-                # Sample input (modify as needed)
-                echo "5 10" | ./"$exe" || true
+                echo "Running $exe with inline sample input..."
+                
+                case "$file" in
+                  *assignment07.cpp)
+                    printf "5\n10\n0\n" | ./"$exe" > "outputs/$(basename "$exe").out" 2>&1 || true
+                    ;;
+                  *CDll.cpp)
+                    printf "1\n2\n3\n0\n" | ./"$exe" > "outputs/$(basename "$exe").out" 2>&1 || true
+                    ;;
+                  *)
+                    # Default input for other programs
+                    echo "5 10" | ./"$exe" > "outputs/$(basename "$exe").out" 2>&1 || true
+                    ;;
+                esac
+
+                echo "Output saved to outputs/$(basename "$exe").out"
               else
                 echo "Compilation failed for $file"
               fi
@@ -45,3 +57,10 @@ jobs:
               echo "Skipping $file (no main function)"
             fi
           done
+
+      # Step 4: Upload outputs as artifacts
+      - name: Upload outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: program-outputs
+          path: outputs/
