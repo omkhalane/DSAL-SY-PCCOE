@@ -21,38 +21,42 @@ jobs:
           sudo apt update -y
           sudo apt install -y g++ build-essential
 
-      - name: Compile all C++ files (check syntax only)
+      # Step 1: Syntax check (no linking)
+      - name: Compile all C++ files (syntax only)
         run: |
-          echo "🔍 Checking syntax of all .cpp files..."
+          echo "🧩 Checking syntax of all .cpp files..."
           for file in $(find . -type f -name "*.cpp"); do
-            echo "🧩 Syntax check: $file"
+            echo "🔹 Checking $file"
             g++ -std=c++20 -Wall -Wextra -fsyntax-only "$file"
-            if [ $? -ne 0 ]; then
-              echo "❌ Syntax errors in $file"
-              exit 1
-            fi
           done
-          echo "✅ All files passed syntax check."
+          echo "✅ Syntax check passed."
 
-      - name: Build and run files with main()
+      # Step 2: Build + Run only main() programs (safely)
+      - name: Build and safely run files with main()
         run: |
           echo "⚙️ Searching for files with main()..."
           mkdir -p build
-          MAIN_FILES=$(grep -rl "int main" --include="*.cpp" . || true)
+          MAIN_FILES=$(grep -rl "int[[:space:]]\+main" --include="*.cpp" . || true)
           if [ -z "$MAIN_FILES" ]; then
-            echo "ℹ️ No files with main() found, skipping execution."
+            echo "ℹ️ No main() files found. Skipping."
             exit 0
           fi
 
           for file in $MAIN_FILES; do
             name=$(basename "$file" .cpp)
             echo "🔧 Compiling $file ..."
-            g++ -std=c++20 -Wall -Wextra -O2 "$file" -o "build/$name.out"
-            if [ $? -ne 0 ]; then
-              echo "❌ Build failed for $file"
-              exit 1
+            g++ -std=c++20 -Wall -Wextra -O2 "$file" -o "build/$name.out" || exit 1
+
+            echo "🧠 Detecting interactivity..."
+            if grep -qE "cin|getline|scanf|std::cin" "$file"; then
+              echo "⚠️ $file uses input — skipping runtime to avoid hang."
+              continue
             fi
-            echo "🚀 Running $name.out"
-            timeout 5s ./build/$name.out || echo "⏳ Program may require input or looped."
+
+            echo "🚀 Running $name.out (max 3s)"
+            timeout 3s "./build/$name.out" > build/"$name"_output.txt 2>&1 \
+              && echo "✅ $file executed successfully." \
+              || echo "⏳ Skipped or timed out (possible loop/menu)."
           done
-          echo "✅ Finished compiling and running main() programs."
+
+          echo "🧾 Run complete — outputs saved in build/ folder."
