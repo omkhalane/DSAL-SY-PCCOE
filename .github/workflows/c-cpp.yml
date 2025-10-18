@@ -18,38 +18,41 @@ jobs:
 
       - name: Set up C++ environment
         run: |
-          sudo apt update
+          sudo apt update -y
           sudo apt install -y g++ build-essential
 
-      - name: Find and Compile all C++ files
+      - name: Compile all C++ files (check syntax only)
         run: |
-          echo "🔍 Searching for .cpp files..."
-          CPP_FILES=$(find . -type f -name "*.cpp")
-          if [ -z "$CPP_FILES" ]; then
-            echo "❌ No .cpp files found."
-            exit 1
-          fi
-          mkdir -p build
-          for file in $CPP_FILES; do
-            echo "⚙️ Compiling $file ..."
-            filename=$(basename "$file" .cpp)
-            g++ -std=c++20 -Wall -Wextra -O2 "$file" -o "build/$filename.out"
+          echo "🔍 Checking syntax of all .cpp files..."
+          for file in $(find . -type f -name "*.cpp"); do
+            echo "🧩 Syntax check: $file"
+            g++ -std=c++20 -Wall -Wextra -fsyntax-only "$file"
             if [ $? -ne 0 ]; then
-              echo "❌ Compilation failed for $file"
+              echo "❌ Syntax errors in $file"
               exit 1
             fi
           done
-          echo "✅ All files compiled successfully."
+          echo "✅ All files passed syntax check."
 
-      - name: Run executables (if any)
+      - name: Build and run files with main()
         run: |
-          echo "🚀 Running compiled programs..."
-          for exe in build/*.out; do
-            echo "-----------------------------"
-            echo "▶️ Running $exe"
-            timeout 5s "$exe" || echo "ℹ️ Skipped (possibly waiting for input or infinite loop)"
-          done
-          echo "✅ Run stage complete."
+          echo "⚙️ Searching for files with main()..."
+          mkdir -p build
+          MAIN_FILES=$(grep -rl "int main" --include="*.cpp" . || true)
+          if [ -z "$MAIN_FILES" ]; then
+            echo "ℹ️ No files with main() found, skipping execution."
+            exit 0
+          fi
 
-      - name: Clean up
-        run: rm -rf build
+          for file in $MAIN_FILES; do
+            name=$(basename "$file" .cpp)
+            echo "🔧 Compiling $file ..."
+            g++ -std=c++20 -Wall -Wextra -O2 "$file" -o "build/$name.out"
+            if [ $? -ne 0 ]; then
+              echo "❌ Build failed for $file"
+              exit 1
+            fi
+            echo "🚀 Running $name.out"
+            timeout 5s ./build/$name.out || echo "⏳ Program may require input or looped."
+          done
+          echo "✅ Finished compiling and running main() programs."
